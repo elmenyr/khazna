@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#1a7a5e">
+<title>خزنتي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #1a7a5e;
+  --green-dark: #115045;
+  --green-light: #e8f5f1;
+  --red: #c0392b;
+  --red-light: #fdecea;
+  --blue: #1a5a9e;
+  --blue-light: #e8f0fb;
+  --amber: #b8860b;
+  --amber-light: #fdf6e3;
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --text: #1a1a2e;
+  --muted: #6b7280;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  --nav-h: 64px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: calc(var(--nav-h) + 12px);
+  overflow-x: hidden;
+}
+
+/* ── top bar ── */
+.topbar {
+  background: var(--green);
+  color: #fff;
+  padding: 14px 18px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(26,122,94,0.3);
+}
+.topbar-icon { font-size: 26px; }
+.topbar-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+.topbar-sub { font-size: 11px; opacity: 0.8; }
+
+/* ── bottom nav ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 200;
+  box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
+}
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-family: 'Cairo', sans-serif;
+  font-size: 11px;
+  padding: 8px 0;
+  transition: color 0.2s;
+}
+.nav-btn .nav-icon { font-size: 22px; transition: transform 0.2s; }
+.nav-btn.active { color: var(--green); }
+.nav-btn.active .nav-icon { transform: scale(1.15); }
+
+/* ── pages ── */
+.page { display: none; padding: 16px; animation: fadeIn 0.2s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ── cards ── */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+/* ── summary strip ── */
+.summary-strip {
+  background: linear-gradient(135deg, var(--green) 0%, #0f5e45 100%);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  margin-bottom: 14px;
+  color: #fff;
+}
+.strip-total-label { font-size: 12px; opacity: 0.8; margin-bottom: 4px; }
+.strip-total { font-size: 34px; font-weight: 700; margin-bottom: 14px; letter-spacing: -1px; }
+.strip-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.strip-item { background: rgba(255,255,255,0.15); border-radius: var(--radius-sm); padding: 10px 12px; }
+.strip-item-label { font-size: 11px; opacity: 0.8; margin-bottom: 3px; }
+.strip-item-val { font-size: 16px; font-weight: 600; }
+
+/* ── wallet grid ── */
+.wallet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+.wallet-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.wallet-icon { font-size: 22px; margin-bottom: 4px; }
+.wallet-name { font-size: 12px; color: var(--muted); }
+.wallet-bal { font-size: 17px; font-weight: 700; }
+.wallet-bal.pos { color: var(--green); }
+.wallet-bal.neg { color: var(--red); }
+
+/* ── section title ── */
+.sec-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── form ── */
+.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.field label { font-size: 13px; color: var(--muted); font-weight: 500; }
+.field input, .field select {
+  font-family: 'Cairo', sans-serif;
+  font-size: 15px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  background: var(--bg);
+  color: var(--text);
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.field input:focus, .field select:focus { border-color: var(--green); background: #fff; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ── type toggle ── */
+.type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.type-btn {
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  background: var(--bg);
+  font-family: 'Cairo', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--muted);
+}
+.type-btn.in.active { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.type-btn.out.active { background: var(--red-light); border-color: var(--red); color: var(--red); }
+
+/* ── big submit btn ── */
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: none;
+  background: var(--green);
+  color: #fff;
+  font-family: 'Cairo', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 4px;
+}
+.btn-submit:active { transform: scale(0.98); background: var(--green-dark); }
+
+/* ── transactions list ── */
+.filter-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px; scrollbar-width: none; }
+.filter-chips::-webkit-scrollbar { display: none; }
+.chip {
+  white-space: nowrap;
+  font-size: 12px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 500;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.chip.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+.txn-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+.txn-item:last-child { border-bottom: none; }
+.txn-dot {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.txn-dot.in { background: var(--green-light); color: var(--green); }
+.txn-dot.out { background: var(--red-light); color: var(--red); }
+.txn-body { flex: 1; min-width: 0; }
+.txn-note { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.txn-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.txn-right { text-align: left; flex-shrink: 0; }
+.txn-amount { font-size: 15px; font-weight: 700; }
+.txn-amount.in { color: var(--green); }
+.txn-amount.out { color: var(--red); }
+.txn-bal { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.txn-del { background: none; border: none; cursor: pointer; color: var(--border); font-size: 16px; padding: 4px; margin-right: -4px; }
+.txn-del:active { color: var(--red); }
+
+.empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state p { font-size: 14px; }
+
+/* ── bons ── */
+.bon-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+.bon-stat { background: var(--card); border-radius: var(--radius-sm); padding: 10px 8px; text-align: center; box-shadow: var(--shadow); }
+.bon-stat-val { font-size: 18px; font-weight: 700; color: var(--amber); }
+.bon-stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.bon-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+.bon-item:last-child { border-bottom: none; }
+.bon-dot {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.bon-dot.active { background: var(--amber-light); color: var(--amber); }
+.bon-dot.used { background: #f0f0f0; color: #aaa; }
+.bon-dot.expired { background: var(--red-light); color: var(--red); }
+.bon-body { flex: 1; min-width: 0; }
+.bon-name-txt { font-size: 14px; font-weight: 600; }
+.bon-meta-txt { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.bon-right { text-align: left; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.bon-val { font-size: 15px; font-weight: 700; color: var(--amber); }
+.bon-status-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+.bon-status-badge.active { background: var(--green-light); color: var(--green); }
+.bon-status-badge.used { background: #f0f0f0; color: #888; }
+.bon-status-badge.expired { background: var(--red-light); color: var(--red); }
+.bon-use-btn {
+  font-size: 11px; padding: 4px 10px;
+  border-radius: 20px;
+  border: 1.5px solid var(--green);
+  background: none;
+  color: var(--green);
+  font-family: 'Cairo', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+}
+.bon-use-btn:active { background: var(--green); color: #fff; }
+.bon-use-btn:disabled { border-color: var(--border); color: var(--muted); cursor: not-allowed; }
+.bon-del { background: none; border: none; cursor: pointer; color: var(--border); font-size: 16px; padding: 4px; }
+.bon-del:active { color: var(--red); }
+
+/* ── toast ── */
+.toast {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 16px);
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #1a1a2e;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 999;
+  opacity: 0;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── search box ── */
+.search-wrap { position: relative; margin-bottom: 10px; }
+.search-wrap input {
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 30px;
+  padding: 10px 38px 10px 14px;
+  background: var(--card);
+  color: var(--text);
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-wrap input:focus { border-color: var(--green); }
+.search-wrap .search-ico { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; opacity: 0.5; pointer-events: none; }
+
+/* ── backup reminder banner ── */
+.backup-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--amber-light);
+  border: 1.5px solid #f0d98a;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.backup-banner .bb-ico { font-size: 22px; flex-shrink: 0; }
+.backup-banner .bb-txt { flex: 1; font-size: 12px; color: #7a5d0a; line-height: 1.5; }
+.backup-banner .bb-btn {
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px; font-weight: 700;
+  background: var(--amber); color: #fff;
+  border: none; border-radius: 20px;
+  padding: 7px 14px; cursor: pointer; flex-shrink: 0;
+}
+.backup-banner .bb-btn:active { background: #9a7209; }
+
+/* ── more / settings ── */
+.btn-secondary, .btn-danger {
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--radius);
+  font-family: 'Cairo', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.15s;
+  margin-bottom: 10px;
+}
+.btn-secondary { border: 1.5px solid var(--green); background: var(--green-light); color: var(--green-dark); }
+.btn-secondary:active { background: #d8efe7; }
+.btn-danger { border: 1.5px solid var(--red); background: var(--red-light); color: var(--red); }
+.btn-danger:active { background: #fbdcd8; }
+.more-note { font-size: 12px; color: var(--muted); line-height: 1.6; margin-top: 2px; }
+.more-stat-row { display: flex; gap: 10px; margin-bottom: 14px; }
+.more-stat { flex: 1; background: var(--card); border-radius: var(--radius-sm); padding: 12px; text-align: center; box-shadow: var(--shadow); }
+.more-stat-val { font-size: 20px; font-weight: 700; color: var(--green); }
+.more-stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.last-backup { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 12px; }
+.last-backup b { color: var(--text); font-weight: 600; }
+.restore-area textarea {
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  width: 100%;
+  min-height: 70px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  resize: vertical;
+  margin-bottom: 10px;
+  direction: ltr;
+  text-align: left;
+}
+.restore-area textarea:focus { border-color: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-icon">🏦</div>
+  <div>
+    <div class="topbar-title">خزنتي</div>
+    <div class="topbar-sub">سجّل كل جيه وكل طلع</div>
+  </div>
+</div>
+
+<!-- ══ HOME PAGE ══ -->
+<div id="page-home" class="page active">
+  <div id="backupBanner"></div>
+  <div class="summary-strip" id="strip"></div>
+  <div class="sec-title">رصيد كل وعاء</div>
+  <div class="wallet-grid" id="walletGrid"></div>
+  <div class="sec-title">إضافة حركة جديدة</div>
+  <div class="card">
+    <div class="type-toggle">
+      <button class="type-btn in active" id="btn-in" onclick="setType('in')">⬇ وارد</button>
+      <button class="type-btn out" id="btn-out" onclick="setType('out')">⬆ صادر</button>
+    </div>
+    <div class="field">
+      <label>الوعاء</label>
+      <select id="txnWallet">
+        <option value="كاش">💵 كاش</option>
+        <option value="فودافون كاش">📱 فودافون كاش</option>
+        <option value="فوري">🏦 فوري</option>
+        <option value="خوارج">📤 خوارج</option>
+        <option value="سُلف">🤝 سُلف</option>
+        <option value="منح اجتماعية">❤️ منح اجتماعية</option>
+      </select>
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>المبلغ (جنيه)</label>
+        <input type="number" id="txnAmount" placeholder="0" min="0" inputmode="decimal">
+      </div>
+      <div class="field">
+        <label>التاريخ</label>
+        <input type="date" id="txnDate">
+      </div>
+    </div>
+    <div class="field">
+      <label>البيان</label>
+      <input type="text" id="txnNote" placeholder="اكتب البيان هنا...">
+    </div>
+    <button class="btn-submit" onclick="addTxn()">✚ أضف الحركة</button>
+  </div>
+</div>
+
+<!-- ══ TRANSACTIONS PAGE ══ -->
+<div id="page-txns" class="page">
+  <div class="search-wrap">
+    <input type="text" id="txnSearch" placeholder="ابحث في البيان أو الوعاء..." oninput="onSearch()">
+    <span class="search-ico">🔍</span>
+  </div>
+  <div class="filter-chips" id="filterChips"></div>
+  <div class="card" id="txnListWrap">
+    <div id="txnList"></div>
+  </div>
+</div>
+
+<!-- ══ BONS PAGE ══ -->
+<div id="page-bons" class="page">
+  <div class="bon-summary" id="bonSummary"></div>
+  <div class="sec-title">إضافة بون جديد</div>
+  <div class="card">
+    <div class="field">
+      <label>اسم البون / الجهة</label>
+      <input type="text" id="bonName" placeholder="مثلاً: بون تموين، بون وقود...">
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>القيمة (جنيه)</label>
+        <input type="number" id="bonVal" placeholder="0" inputmode="decimal">
+      </div>
+      <div class="field">
+        <label>تاريخ الاستلام</label>
+        <input type="date" id="bonDate">
+      </div>
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>تاريخ الانتهاء</label>
+        <input type="date" id="bonExpiry">
+      </div>
+      <div class="field">
+        <label>ملاحظات</label>
+        <input type="text" id="bonNote" placeholder="اختياري...">
+      </div>
+    </div>
+    <button class="btn-submit" style="background:#b8860b" onclick="addBon()">🎟 أضف البون</button>
+  </div>
+  <div class="sec-title">البونات</div>
+  <div class="card"><div id="bonList"></div></div>
+</div>
+
+<!-- ══ MORE PAGE ══ -->
+<div id="page-more" class="page">
+  <div class="more-stat-row">
+    <div class="more-stat"><div class="more-stat-val" id="moreTxnCount">0</div><div class="more-stat-label">حركة محفوظة</div></div>
+    <div class="more-stat"><div class="more-stat-val" id="moreBonCount" style="color:var(--amber)">0</div><div class="more-stat-label">بون محفوظ</div></div>
+  </div>
+
+  <div class="sec-title">النسخة الاحتياطية</div>
+  <div class="card">
+    <div class="last-backup" id="lastBackup"></div>
+    <button class="btn-secondary" onclick="exportBackup()">⬇ نزّل نسخة احتياطية</button>
+    <button class="btn-secondary" onclick="copyBackup()">📋 انسخ البيانات</button>
+    <p class="more-note">احفظ النسخة دي في مكان آمن (واتساب لنفسك، الإيميل، أو ملفات الموبايل). البيانات بتتسجل تلقائي على الجهاز، لكن النسخة الاحتياطية بتضمن إنها متضيعش لو اتقفل المتصفح أو اتمسحت بياناته.</p>
+  </div>
+
+  <div class="sec-title">استرجاع البيانات</div>
+  <div class="card restore-area">
+    <label class="btn-secondary" for="restoreFile" style="cursor:pointer">📂 اختر ملف نسخة احتياطية</label>
+    <input type="file" id="restoreFile" accept="application/json,.json" style="display:none" onchange="importFromFile(event)">
+    <p class="more-note" style="margin-bottom:12px">أو الصق نص النسخة هنا:</p>
+    <textarea id="restoreText" placeholder='{"txns":[...],"bons":[...]}'></textarea>
+    <button class="btn-secondary" onclick="importFromText()">↩ استرجع من النص</button>
+    <p class="more-note">الاسترجاع هيستبدل كل البيانات الحالية بالكامل.</p>
+  </div>
+
+  <div class="sec-title" style="color:var(--red)">منطقة الخطر</div>
+  <div class="card">
+    <button class="btn-danger" onclick="clearAll()">🗑 امسح كل البيانات</button>
+    <p class="more-note">هيمسح كل الحركات والبونات نهائيًا. متعملش ده غير لو عامل نسخة احتياطية الأول.</p>
+  </div>
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="goPage('home')">
+    <span class="nav-icon">🏠</span>الرئيسية
+  </button>
+  <button class="nav-btn" id="nav-txns" onclick="goPage('txns')">
+    <span class="nav-icon">📋</span>الحركات
+  </button>
+  <button class="nav-btn" id="nav-bons" onclick="goPage('bons')">
+    <span class="nav-icon">🎟</span>البونات
+  </button>
+  <button class="nav-btn" id="nav-more" onclick="goPage('more')">
+    <span class="nav-icon">⚙️</span>المزيد
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const WALLETS = [
+  {id:'كاش', icon:'💵'},
+  {id:'فودافون كاش', icon:'📱'},
+  {id:'فوري', icon:'🏦'},
+  {id:'خوارج', icon:'📤'},
+  {id:'سُلف', icon:'🤝'},
+  {id:'منح اجتماعية', icon:'❤️'}
+];
+
+let storageOK = true;
+function loadData(key) {
+  try { return JSON.parse(localStorage.getItem(key) || '[]'); }
+  catch (e) { return []; }
+}
+let txns = loadData('khz2_txns');
+let bons = loadData('khz2_bons');
+let txnType = 'in';
+let txnFilter = 'الكل';
+let txnSearch = '';
+let curPage = 'home';
+
+function save() {
+  try {
+    localStorage.setItem('khz2_txns', JSON.stringify(txns));
+    localStorage.setItem('khz2_bons', JSON.stringify(bons));
+    storageOK = true;
+  } catch (e) {
+    storageOK = false;
+    toast('⚠️ مش قادر يحفظ — اعمل نسخة احتياطية من «المزيد»');
+  }
+}
+
+function fmt(n) {
+  return Math.abs(Math.round(n)).toLocaleString('ar-EG') + ' ج';
+}
+
+function today() { return new Date().toISOString().split('T')[0]; }
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function setType(t) {
+  txnType = t;
+  document.getElementById('btn-in').classList.toggle('active', t === 'in');
+  document.getElementById('btn-out').classList.toggle('active', t === 'out');
+}
+
+function goPage(p) {
+  curPage = p;
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-' + p).classList.add('active');
+  if (p === 'home') renderHome();
+  if (p === 'txns') renderTxns();
+  if (p === 'bons') renderBons();
+  if (p === 'more') renderMore();
+}
+
+/* ── calc ── */
+function calcWallets() {
+  const w = {};
+  WALLETS.forEach(wl => w[wl.id] = 0);
+  txns.forEach(t => {
+    w[t.wallet] = (w[t.wallet] || 0) + (t.type === 'in' ? t.amount : -t.amount);
+  });
+  return w;
+}
+
+function txnsWithBalances() {
+  const arr = txns.map((t, i) => ({ ...t, idx: i }));
+  const chron = [...arr].sort((a, b) =>
+    a.date < b.date ? -1 : a.date > b.date ? 1 : a.idx - b.idx
+  );
+  let b = 0;
+  const balById = {};
+  chron.forEach(t => { b += t.type === 'in' ? t.amount : -t.amount; balById[t.idx] = b; });
+  arr.forEach(a => { a.runBal = balById[a.idx]; });
+  return arr;
+}
+
+function bonStatus(b) {
+  if (b.used) return 'used';
+  if (b.expiry && b.expiry < today()) return 'expired';
+  return 'active';
+}
+
+/* ── HOME ── */
+function renderHome() {
+  renderBackupBanner();
+  const w = calcWallets();
+  const total = Object.values(w).reduce((a, b) => a + b, 0);
+  const totalIn = txns.filter(t => t.type === 'in').reduce((a, t) => a + t.amount, 0);
+  const totalOut = txns.filter(t => t.type === 'out').reduce((a, t) => a + t.amount, 0);
+  const bonAmt = bons.filter(b => bonStatus(b) === 'active').reduce((a, b) => a + b.val, 0);
+
+  document.getElementById('strip').innerHTML = `
+    <div class="strip-total-label">إجمالي الخزنة</div>
+    <div class="strip-total">${fmt(total)}</div>
+    <div class="strip-row">
+      <div class="strip-item"><div class="strip-item-label">⬇ وارد</div><div class="strip-item-val">${fmt(totalIn)}</div></div>
+      <div class="strip-item"><div class="strip-item-label">⬆ صادر</div><div class="strip-item-val">${fmt(totalOut)}</div></div>
+      <div class="strip-item"><div class="strip-item-label">عدد الحركات</div><div class="strip-item-val">${txns.length}</div></div>
+      <div class="strip-item"><div class="strip-item-label">🎟 بونات متاحة</div><div class="strip-item-val">${fmt(bonAmt)}</div></div>
+    </div>
+  `;
+
+  document.getElementById('walletGrid').innerHTML = WALLETS.map(wl => `
+    <div class="wallet-card">
+      <div class="wallet-icon">${wl.icon}</div>
+      <div class="wallet-name">${wl.id}</div>
+      <div class="wallet-bal ${w[wl.id] >= 0 ? 'pos' : 'neg'}">${(w[wl.id] < 0 ? '−' : '') + fmt(w[wl.id])}</div>
+    </div>
+  `).join('');
+}
+
+/* ── TXNS ── */
+function renderTxns() {
+  const cats = ['الكل', 'وارد', 'صادر', ...WALLETS.map(w => w.id)];
+  document.getElementById('filterChips').innerHTML = cats.map(c =>
+    `<button class="chip ${txnFilter === c ? 'active' : ''}" onclick="setFilter('${c}')">${c}</button>`
+  ).join('');
+
+  const bals = txnsWithBalances();
+  let list = bals;
+  if (txnFilter === 'وارد') list = list.filter(t => t.type === 'in');
+  else if (txnFilter === 'صادر') list = list.filter(t => t.type === 'out');
+  else if (txnFilter !== 'الكل') list = list.filter(t => t.wallet === txnFilter);
+  if (txnSearch) {
+    const q = txnSearch.toLowerCase();
+    list = list.filter(t => (t.note || '').toLowerCase().includes(q) || t.wallet.toLowerCase().includes(q));
+  }
+  // newest first: by date desc, ties by insertion order desc
+  list = [...list].sort((a, b) =>
+    a.date < b.date ? 1 : a.date > b.date ? -1 : b.idx - a.idx
+  );
+
+  if (!list.length) {
+    const msg = (txnSearch || txnFilter !== 'الكل') ? 'مفيش حركات مطابقة' : 'مفيش حركات لسه — ابدأ من الرئيسية';
+    document.getElementById('txnList').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>${msg}</p></div>`;
+    return;
+  }
+
+  document.getElementById('txnList').innerHTML = list.map(t => `
+    <div class="txn-item">
+      <div class="txn-dot ${t.type}">${t.type === 'in' ? '⬇' : '⬆'}</div>
+      <div class="txn-body">
+        <div class="txn-note">${t.note || (t.type === 'in' ? 'وارد' : 'صادر')}</div>
+        <div class="txn-meta">${t.wallet} · ${t.date}</div>
+      </div>
+      <div class="txn-right">
+        <div class="txn-amount ${t.type}">${t.type === 'in' ? '+' : '−'}${fmt(t.amount)}</div>
+        <div class="txn-bal">رصيد: ${fmt(t.runBal)}</div>
+      </div>
+      <button class="txn-del" onclick="delTxn(${t.idx})">🗑</button>
+    </div>
+  `).join('');
+}
+
+function setFilter(f) { txnFilter = f; renderTxns(); }
+function onSearch() { txnSearch = document.getElementById('txnSearch').value.trim(); renderTxns(); }
+
+/* ── ADD TXN ── */
+function addTxn() {
+  const wallet = document.getElementById('txnWallet').value;
+  const amount = parseFloat(document.getElementById('txnAmount').value);
+  const date = document.getElementById('txnDate').value;
+  const note = document.getElementById('txnNote').value.trim();
+  if (!amount || amount <= 0) { toast('❗ اكتب مبلغ صحيح'); return; }
+  if (!date) { toast('❗ اختار التاريخ'); return; }
+  txns.push({ type: txnType, wallet, amount, date, note });
+  save();
+  document.getElementById('txnAmount').value = '';
+  document.getElementById('txnNote').value = '';
+  toast(txnType === 'in' ? '✅ تم إضافة الوارد' : '✅ تم إضافة الصادر');
+  renderHome();
+}
+
+function delTxn(i) {
+  if (!confirm('تحذف الحركة دي؟')) return;
+  txns.splice(i, 1);
+  save();
+  renderTxns();
+  renderHome();
+}
+
+/* ── BONS ── */
+function renderBons() {
+  const active = bons.filter(b => bonStatus(b) === 'active');
+  const used = bons.filter(b => b.used);
+  const expired = bons.filter(b => bonStatus(b) === 'expired');
+  const totalAmt = active.reduce((a, b) => a + b.val, 0);
+
+  document.getElementById('bonSummary').innerHTML = `
+    <div class="bon-stat"><div class="bon-stat-val">${active.length}</div><div class="bon-stat-label">متاح</div></div>
+    <div class="bon-stat"><div class="bon-stat-val" style="color:var(--muted)">${used.length}</div><div class="bon-stat-label">مستخدم</div></div>
+    <div class="bon-stat"><div class="bon-stat-val" style="color:var(--red)">${expired.length}</div><div class="bon-stat-label">منتهي</div></div>
+  `;
+
+  if (!bons.length) {
+    document.getElementById('bonList').innerHTML = `<div class="empty-state"><div class="empty-icon">🎟</div><p>لا توجد بونات بعد</p></div>`;
+    return;
+  }
+
+  const sorted = [...bons].map((b, i) => ({ ...b, idx: i }))
+    .sort((a, b) => { const o = { active: 0, expired: 1, used: 2 }; return o[bonStatus(a)] - o[bonStatus(b)]; });
+
+  const statusLabel = { active: 'متاح', used: 'مستخدم', expired: 'منتهي' };
+
+  document.getElementById('bonList').innerHTML = sorted.map(b => {
+    const st = bonStatus(b);
+    return `
+      <div class="bon-item">
+        <div class="bon-dot ${st}">🎟</div>
+        <div class="bon-body">
+          <div class="bon-name-txt">${b.name}</div>
+          <div class="bon-meta-txt">${b.date}${b.expiry ? ' — ينتهي ' + b.expiry : ''}${b.note ? ' · ' + b.note : ''}</div>
+        </div>
+        <div class="bon-right">
+          <div class="bon-val">${fmt(b.val)}</div>
+          <span class="bon-status-badge ${st}">${statusLabel[st]}</span>
+          <button class="bon-use-btn" onclick="useBon(${b.idx})" ${st !== 'active' ? 'disabled' : ''}>
+            ${st === 'active' ? 'سجّل كمستخدم' : st === 'used' ? '✓ مستخدم' : 'منتهي'}
+          </button>
+        </div>
+        <button class="bon-del" onclick="delBon(${b.idx})">🗑</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function addBon() {
+  const name = document.getElementById('bonName').value.trim();
+  const val = parseFloat(document.getElementById('bonVal').value);
+  const date = document.getElementById('bonDate').value;
+  const expiry = document.getElementById('bonExpiry').value;
+  const note = document.getElementById('bonNote').value.trim();
+  if (!name) { toast('❗ اكتب اسم البون'); return; }
+  if (!val || val <= 0) { toast('❗ اكتب قيمة صحيحة'); return; }
+  if (!date) { toast('❗ اختار تاريخ الاستلام'); return; }
+  bons.push({ name, val, date, expiry, note, used: false });
+  save();
+  document.getElementById('bonName').value = '';
+  document.getElementById('bonVal').value = '';
+  document.getElementById('bonExpiry').value = '';
+  document.getElementById('bonNote').value = '';
+  toast('✅ تم إضافة البون');
+  renderBons();
+}
+
+function useBon(i) {
+  if (!confirm('تسجّل البون ده كمستخدم؟')) return;
+  bons[i].used = true;
+  bons[i].usedDate = today();
+  save();
+  toast('✅ تم تسجيل الاستخدام');
+  renderBons();
+  renderHome();
+}
+
+function delBon(i) {
+  if (!confirm('تحذف البون ده؟')) return;
+  bons.splice(i, 1);
+  save();
+  renderBons();
+}
+
+/* ── backup & restore ── */
+function backupPayload() {
+  return JSON.stringify({ app: 'khaznati', v: 1, exportedAt: new Date().toISOString(), txns, bons }, null, 2);
+}
+
+function markBackup() {
+  try { localStorage.setItem('khz2_lastBackup', new Date().toISOString()); } catch (e) {}
+}
+
+function exportBackup() {
+  try {
+    const blob = new Blob([backupPayload()], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'khaznati-backup-' + today() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    markBackup();
+    toast('✅ تم تنزيل النسخة الاحتياطية');
+    renderMore();
+  } catch (e) {
+    toast('⚠️ التنزيل مش متاح — استخدم «انسخ البيانات»');
+  }
+}
+
+async function copyBackup() {
+  const text = backupPayload();
+  try {
+    await navigator.clipboard.writeText(text);
+    markBackup();
+    toast('✅ تم نسخ البيانات — الصقها في مكان آمن');
+    renderMore();
+  } catch (e) {
+    const ta = document.getElementById('restoreText');
+    ta.value = text;
+    ta.select();
+    toast('انسخ النص من الصندوق بالأسفل');
+  }
+}
+
+function applyImport(raw) {
+  let data;
+  try { data = JSON.parse(raw); }
+  catch (e) { toast('❗ الملف مش صالح'); return; }
+  const newTxns = Array.isArray(data) ? data : data.txns;
+  const newBons = Array.isArray(data) ? [] : data.bons;
+  if (!Array.isArray(newTxns)) { toast('❗ مفيش بيانات صالحة في الملف'); return; }
+  if (!confirm('الاسترجاع هيستبدل كل البيانات الحالية. متأكد؟')) return;
+  txns = newTxns;
+  bons = Array.isArray(newBons) ? newBons : [];
+  save();
+  document.getElementById('restoreText').value = '';
+  toast('✅ تم استرجاع البيانات');
+  renderMore();
+}
+
+function importFromText() {
+  const raw = document.getElementById('restoreText').value.trim();
+  if (!raw) { toast('❗ الصق نص النسخة الأول'); return; }
+  applyImport(raw);
+}
+
+function importFromFile(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => applyImport(reader.result);
+  reader.onerror = () => toast('❗ مش قادر يقرا الملف');
+  reader.readAsText(file);
+  ev.target.value = '';
+}
+
+function clearAll() {
+  if (!confirm('هتمسح كل الحركات والبونات نهائيًا. متأكد؟')) return;
+  if (!confirm('آخر تأكيد — مفيش رجوع بعد كده. امسح؟')) return;
+  txns = [];
+  bons = [];
+  save();
+  toast('تم مسح كل البيانات');
+  renderMore();
+}
+
+function relDate(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d)) return null;
+  const days = Math.floor((Date.now() - d.getTime()) / 86400000);
+  if (days <= 0) return 'النهارده';
+  if (days === 1) return 'إمبارح';
+  return 'من ' + days + ' يوم';
+}
+
+function renderBackupBanner() {
+  const el = document.getElementById('backupBanner');
+  if (!txns.length && !bons.length) { el.innerHTML = ''; return; }
+  let last = null;
+  try { last = localStorage.getItem('khz2_lastBackup'); } catch (e) {}
+  const d = last ? new Date(last) : null;
+  const days = d && !isNaN(d) ? Math.floor((Date.now() - d.getTime()) / 86400000) : Infinity;
+  if (days < 7 && storageOK) { el.innerHTML = ''; return; }
+  const msg = !last
+    ? 'لسه معملتش نسخة احتياطية. اعمل واحدة عشان بياناتك متضيعش.'
+    : 'آخر نسخة احتياطية بقالها فترة. يُفضّل تعمل نسخة جديدة.';
+  el.innerHTML = `
+    <div class="backup-banner">
+      <div class="bb-ico">🛟</div>
+      <div class="bb-txt">${msg}</div>
+      <button class="bb-btn" onclick="goPage('more')">احفظ</button>
+    </div>`;
+}
+
+function renderMore() {
+  document.getElementById('moreTxnCount').textContent = txns.length;
+  document.getElementById('moreBonCount').textContent = bons.length;
+  let last = null;
+  try { last = localStorage.getItem('khz2_lastBackup'); } catch (e) {}
+  const rel = relDate(last);
+  document.getElementById('lastBackup').innerHTML = rel
+    ? `آخر نسخة احتياطية: <b>${rel}</b>`
+    : 'لسه معملتش نسخة احتياطية';
+}
+
+/* ── init ── */
+document.getElementById('txnDate').value = today();
+document.getElementById('bonDate').value = today();
+(function checkStorage() {
+  try {
+    localStorage.setItem('khz2_test', '1');
+    localStorage.removeItem('khz2_test');
+  } catch (e) {
+    storageOK = false;
+    setTimeout(() => toast('⚠️ الحفظ التلقائي مش شغّال — اعمل نسخة احتياطية باستمرار'), 600);
+  }
+})();
+renderHome();
+</script>
+</body>
+</html>
